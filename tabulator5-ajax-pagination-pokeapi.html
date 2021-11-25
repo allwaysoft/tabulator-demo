@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tabulator Example</title>
+        <link href="css/tabulator.css" rel="stylesheet">
+        <script type="text/javascript" src="js/tabulator.js"></script>
+        <style>
+            /*Horizontally center header and footer*/
+            .tabulator-print-header, tabulator-print-footer{
+                text-align:center;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="example-table"></div>
+        <script type="text/javascript">
+//Build Tabulator
+            var table = new Tabulator("#example-table", {
+                height: "311px",
+                layout: "fitColumns",
+                placeholder: "No Data Set",
+                pagination: true, //enable pagination
+                paginationMode: "remote", //enable remote pagination
+                paginationSize: 5,
+                paginationInitialPage: 1,
+                ajaxURL: "https://pokeapi.co/api/v2/pokemon", //set url for ajax request
+                ajaxURLGenerator: function (url, config, params) {
+                    console.log(params.page);
+                    console.log(params.size);
+                    var offset = (params.page - 1) * params.size;
+                    var limit = params.size;
+                    //https://pokeapi.co/api/v2/pokemon?offset=20&limit=20
+                    return url + "?offset=" + offset + "&limit=" + limit; //encode parameters as a json object
+                },
+                ajaxResponse: function (url, params, response) {
+                    console.log(response);
+
+                    response['last_page'] = response['count'];
+                    response['data'] = response['results'];
+                    response.last_page = Math.ceil(response.count / table.getPageSize());
+                    console.log("last_page:=" + response.last_page);
+                    console.log("getPageSize=" + table.getPageSize());
+                    console.log(response['last_page']);
+                    return response;
+                },
+
+                columns: [
+                    {title: "Pokemon", field: "name"},
+                    {title: "URL", field: "url"},
+                ],
+            });
+        </script>
+    </body>
+</html>
